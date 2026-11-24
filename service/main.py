@@ -16,7 +16,14 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 
 app = FastAPI()
-Instrumentator().instrument(app).expose(app)
+
+# Latency buckets (seconds) for http_request_duration_seconds. The library
+# default is (0.1, 0.5, 1), which puts every millisecond-scale request in the
+# first bucket and makes histogram_quantile() report ~95 ms for a p95 that is
+# really ~2-5 ms. Finer low-end buckets keep percentile panels honest.
+LATENCY_BUCKETS = (0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1)
+
+Instrumentator().instrument(app, latency_lowr_buckets=LATENCY_BUCKETS).expose(app)
 
 MODEL_PATH = Path(__file__).with_name("model.bin")
 
