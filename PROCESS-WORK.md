@@ -320,12 +320,13 @@ HighServerErrorRate stayed inactive (no 5xx), as expected.
 ## 11. Git history
 
 ```
-c5dc642  Add error and p95 latency panels to Grafana dashboard   (pushed to origin/main)
+83a8cf3  Add error-rate alerts and process write-up              (Improvement 2 + this file)
+c5dc642  Add error and p95 latency panels to Grafana dashboard   (Improvement 1)
 a97bb22  Initial commit
 ```
 
-- The work was done on the branch `add-error-and-p95-panels`, fast-forward merged into `main`, pushed, and the branch was deleted.
-- **Not yet committed:** the error-rate alerts in `prometheus/alert.yaml` and this `PROCESS-WORK.md`.
+- Each change was committed on a short-lived branch, fast-forward merged into `main`, pushed to `origin/main`, and the branch was deleted.
+- All work is pushed; `main` matches `origin/main`.
 - Untracked and unrelated: `ruvector.db`, a local file from a Claude Code plugin.
 
 ---
