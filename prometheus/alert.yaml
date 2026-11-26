@@ -9,3 +9,34 @@ groups:
         annotations:
           summary: "{{ $labels.instance }} is down"
           description: "Prometheus has been unable to scrape {{ $labels.instance }} for 5 minutes."
+
+      # Error-rate alerts compare failed requests with all requests over 5 minutes.
+      # /metrics (Prometheus scrapes) and /health (Docker healthchecks) are left out
+      # so background traffic does not dilute the ratio. With no user traffic the
+      # ratio is 0/0 = NaN, which never fires. Note that rate() misses the very
+      # first error after a restart, because that counter series starts at 1.
+      - alert: HighServerErrorRate
+        expr: |
+          sum(rate(http_requests_total{job="services", status="5xx", handler!~"/metrics|/health"}[5m]))
+          /
+          sum(rate(http_requests_total{job="services", handler!~"/metrics|/health"}[5m]))
+          > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Model service is returning server errors"
+          description: "{{ $value | humanizePercentage }} of requests failed with 5xx over the last 5 minutes (threshold 5%)."
+
+      - alert: HighClientErrorRate
+        expr: |
+          sum(rate(http_requests_total{job="services", status="4xx", handler!~"/metrics|/health"}[5m]))
+          /
+          sum(rate(http_requests_total{job="services", handler!~"/metrics|/health"}[5m]))
+          > 0.20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Many model service requests are rejected as client errors"
+          description: "{{ $value | humanizePercentage }} of requests failed with 4xx over the last 5 minutes (threshold 20%). Check for a broken client or wrong URLs."
